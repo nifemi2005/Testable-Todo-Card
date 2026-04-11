@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <article data-testid="test-todo-card" class="container">
+      <div class="header">
+        <div class="wrap">
+          <h2>TaskFlow</h2>
+          <span>3 tasks</span>
+        </div>
+        <p data-testid="test-todo-description">
+          Stay on top of your work. Track tasks by priority, deadline, and
+          status so nothing slips through the cracks.
+        </p>
+      </div>
+      <form>
+        <div>
+          <label for="task-input">Your Task</label>
+          <input type="text" name="" id="task-input" />
+        </div>
+        <div>
+          <label for="priority">priority</label>
+          <select name="" id="priority">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div>
+          <label for="due-date">Due Date</label>
+          <input type="datetime-local" id="due-date" name="due-date" />
+        </div>
+        <div>
+            <label for="status-input">Status</label>
+          <select name="" id="status-input">
+            <option value="pending">Pending</option>
+            <option value="in progress">In progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+        <div>
+          <label for="tag-input">Tags</label>
+          <input type="text" name="" id="tag-input" />
+        </div>
+        <button>Add Task</button>
+      </form>
+      <div>
+        <ul id="task-list"></ul>
+      </div>
+    </article>
+    <script src="script.js"></script>
+  </body>
+</html>
