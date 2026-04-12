@@ -41,6 +41,8 @@ form.addEventListener("submit", function (e) {
   tags = [];
 
   form.reset();
+
+  updateTaskCount();
 });
 
 function renderTask(task) {
@@ -89,8 +91,10 @@ function renderTask(task) {
       <div class="card-body">
         <div class="card-row">
           <span class="task-title">${task.title}</span>
-          <span class="priority-badge ${priorityClass}" data-testid="test-todo-priority">${task.priority}</span>
-          <span class="status-badge ${statusClass}" data-testid="test-todo-status">${task.status}</span>
+          <div class='group'>
+            <span class="priority-badge ${priorityClass}" data-testid="test-todo-priority">${task.priority}</span>
+            <span class="status-badge ${statusClass}" data-testid="test-todo-status">${task.status}</span>
+          </div>
         </div>
         <div class="card-meta">
           <time class="due-date" data-testid="test-todo-due-date">Due: ${formattedDate}</time>
@@ -180,6 +184,9 @@ taskList.addEventListener("click", function (e) {
     }, 300);
 
     tasks = tasks.filter((task) => task.id !== taskId);
+
+    tasks = tasks.filter((task) => task.id !== taskId);
+    updateTaskCount();
   }
 });
 
@@ -256,3 +263,9 @@ taskList.addEventListener("click", function (e) {
     form.scrollIntoView({ behavior: "smooth" });
   }
 });
+
+const taskCount = document.getElementById("count");
+
+function updateTaskCount() {
+  taskCount.textContent = `${tasks.length} task`;
+}

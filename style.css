@@ -375,6 +375,10 @@ form button:hover {
   .card-actions {
     justify-content: flex-start;
   }
+  .group{
+    display: flex;
+    align-items: center;
+  }
 }
 
 /* 481px - 768px (tablet) */
