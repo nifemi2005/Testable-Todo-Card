@@ -127,7 +127,7 @@ function updateTimeHint(task) {
   }
 
   const now = new Date();
-  const due = Date(task.dueDate);
+  const due = new Date(task.dueDate);
 
   const diffMs = due - now;
 
