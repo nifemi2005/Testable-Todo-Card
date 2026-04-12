@@ -3,6 +3,7 @@ const taskInput = document.getElementById("task-input");
 const priorityInput = document.getElementById("priority");
 const dueDateInput = document.getElementById("due-date");
 const statusInput = document.getElementById("status-input");
+const descriptionInput = document.getElementById("description-input");
 const tagInput = document.getElementById("tag-input");
 const taskList = document.getElementById("task-list");
 
@@ -27,6 +28,7 @@ form.addEventListener("submit", function (e) {
   const task = {
     id: Date.now(),
     title: taskTitle,
+    description: descriptionInput.value.trim(),
     priority: priorityInput.value,
     dueDate: dueDateInput.value,
     status: statusInput.value,
@@ -85,6 +87,7 @@ function renderTask(task) {
         aria-label="Mark task complete"
         aria-checked="${task.done}"
         ${task.done ? "checked" : ""}
+        data-testid="test-todo-complete-toggle"
       />
       <label></label>
     </div>
@@ -96,11 +99,12 @@ function renderTask(task) {
             <span class="status-badge ${statusClass}" data-testid="test-todo-status">${task.status}</span>
           </div>
         </div>
+        <p class="task-description" data-testid="test-todo-description">${task.description}</p>
         <div class="card-meta">
           <time class="due-date" data-testid="test-todo-due-date">Due: ${formattedDate}</time>
           <time class="time-hint" data-testid="test-todo-time-remaining" id="hint-${task.id}"></time>
         </div>
-        <ul class="tags" data-testid="test-todo-tags" role="list>
+        <ul class="tags" data-testid="test-todo-tags" role="list">
           <li>${tagsHTML}</li>
         </ul>
         <div class="card-actions">
@@ -184,8 +188,6 @@ taskList.addEventListener("click", function (e) {
     }, 300);
 
     tasks = tasks.filter((task) => task.id !== taskId);
-
-    tasks = tasks.filter((task) => task.id !== taskId);
     updateTaskCount();
   }
 });
@@ -247,6 +249,7 @@ taskList.addEventListener("click", function (e) {
     const task = tasks.find((task) => task.id === taskId);
 
     taskInput.value = task.title;
+    descriptionInput.value = task.description;
     priorityInput.value = task.priority;
     dueDateInput.value = task.dueDate;
     statusInput.value = task.status;
