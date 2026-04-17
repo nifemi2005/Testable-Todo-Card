@@ -248,24 +248,154 @@ taskList.addEventListener("click", function (e) {
 
     const task = tasks.find((task) => task.id === taskId);
 
-    taskInput.value = task.title;
-    descriptionInput.value = task.description;
-    priorityInput.value = task.priority;
-    dueDateInput.value = task.dueDate;
-    statusInput.value = task.status;
+    const editBtn = e.target;
 
-    tags = [...task.tags];
+    card.innerHTML = `
+    <form data-testid="test-todo-edit-form" class="edit-form">
+      
+      <div class="edit-field">
+        <label for="edit-title-${task.id}">Title</label>
+        <input 
+          type="text" 
+          id="edit-title-${task.id}"
+          data-testid="test-todo-edit-title-input"
+          value="${task.title}"
+          class="edit-input"
+        />
+      </div>
 
-    card.style.opacity = "0";
-    setTimeout(function () {
-      card.remove();
-    }, 300);
+      <div class="edit-field">
+        <label for="edit-desc-${task.id}">Description</label>
+        <textarea 
+          id="edit-desc-${task.id}"
+          data-testid="test-todo-edit-description-input"
+          class="edit-input edit-textarea"
+        >${task.description || ""}</textarea>
+      </div>
 
-    tasks = tasks.filter((t) => t.id !== taskId);
+      <div class="edit-field">
+        <label for="edit-priority-${task.id}">Priority</label>
+        <select 
+          id="edit-priority-${task.id}"
+          data-testid="test-todo-edit-priority-select"
+          class="edit-input"
+        >
+          <option value="low" ${task.priority === "low" ? "selected" : ""}>Low</option>
+          <option value="medium" ${task.priority === "medium" ? "selected" : ""}>Medium</option>
+          <option value="high" ${task.priority === "high" ? "selected" : ""}>High</option>
+        </select>
+      </div>
 
-    form.scrollIntoView({ behavior: "smooth" });
+      <div class="edit-field">
+        <label for="edit-due-${task.id}">Due Date</label>
+        <input 
+          type="datetime-local" 
+          id="edit-due-${task.id}"
+          data-testid="test-todo-edit-due-date-input"
+          value="${task.dueDate || ""}"
+          class="edit-input"
+        />
+      </div>
+
+      <div class="edit-actions">
+        <button 
+          type="submit"
+          data-testid="test-todo-save-button"
+          class="save-btn"
+        >Save</button>
+        <button 
+          type="button"
+          data-testid="test-todo-cancel-button"
+          class="cancel-btn"
+        >Cancel</button>
+      </div>
+
+    </form>
+    `;
+    card.querySelector(`#edit-title-${task.id}`).focus();
+
+    card.querySelector(".edit-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      task.title = card.querySelector(`#edit-title-${task.id}`).value.trim();
+      task.description = card
+        .querySelector(`#edit-desc-${task.id}`)
+        .value.trim();
+      task.priority = card.querySelector(`#edit-priority-${task.id}`).value;
+      task.dueDate = card.querySelector(`#edit-due-${task.id}`).value;
+
+      card.innerHTML = "";
+      rebuildCard(card, task);
+
+      card.querySelector(".edit-btn").focus();
+    });
+
+    card.querySelector(".cancel-btn").addEventListener("click", function () {
+      card.innerHTML = "";
+      rebuildCard(card, task);
+
+      card.querySelector(".edit-btn").focus();
+    });
   }
 });
+
+function rebuildCard(card, task) {
+  const formattedDate = task.dueDate
+    ? new Date(task.dueDate).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      })
+    : 'No due date';
+
+  const priorityClass = `priority-${task.priority}`;
+  const statusClass = `status-${task.status.replace(' ', '')}`;
+  const tagsHTML = task.tags
+    .map(tag => `<span class="tag" data-testid="test-todo-tag-${tag.toLowerCase()}">${tag}</span>`)
+    .join('');
+
+  card.innerHTML = `
+    <div class="card-top">
+      <label for="checkbox-${task.id}">
+        <input 
+          type="checkbox" 
+          id="checkbox-${task.id}"
+          role="checkbox"
+          aria-label="Mark task complete"
+          aria-checked="${task.done}"
+          ${task.done ? 'checked' : ''}
+        />
+        <span></span>
+      </label>
+      <div class="card-body">
+        <div class="card-row">
+          <span class="task-title">${task.title}</span>
+          <span class="priority-badge ${priorityClass}">${task.priority}</span>
+          <span class="status-badge ${statusClass}">${task.status}</span>
+        </div>
+        ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
+        <div class="card-meta">
+          <span class="due-date">Due ${formattedDate}</span>
+          <span class="time-hint" id="hint-${task.id}" aria-live="polite"></span>
+        </div>
+        <div class="tags">${tagsHTML}</div>
+        <div class="card-actions">
+          <button class="edit-btn" aria-label="Edit task">Edit</button>
+          <button class="delete-btn" aria-label="Delete task">Delete</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // reapply done class if task is done
+  if (task.done) card.classList.add('done');
+  else card.classList.remove('done');
+
+  // update the time hint
+  updateTimeHint(task);
+}
 
 const taskCount = document.getElementById("count");
 
