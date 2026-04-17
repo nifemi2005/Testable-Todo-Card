@@ -47,6 +47,29 @@ form.addEventListener("submit", function (e) {
   updateTaskCount();
 });
 
+function descriptionHTML(task) {
+  if (!task.description) return "";
+  if (task.description.length <= 100) {
+    return `<p class="task-description" data-testid="test-todo-description">${task.description}</p>`;
+  }
+  const preview = task.description.slice(0, 100);
+  return `
+    <div class="description-wrapper">
+      <p class="task-description" data-testid="test-todo-description">${preview}...</p>
+      <div id="desc-full-${task.id}" class="desc-full" data-testid="test-todo-collapsible-section" hidden>
+        <p class="task-description">${task.description}</p>
+      </div>
+      <button
+        type="button"
+        class="expand-toggle"
+        data-testid="test-todo-expand-toggle"
+        aria-expanded="false"
+        aria-controls="desc-full-${task.id}"
+      >Show more</button>
+    </div>
+  `;
+}
+
 function renderTask(task) {
   const li = document.createElement("li");
 
@@ -104,7 +127,7 @@ function renderTask(task) {
             </select>
           </div>
         </div>
-        <p class="task-description" data-testid="test-todo-description">${task.description}</p>
+        ${descriptionHTML(task)}
         <div class="card-meta">
           <time class="due-date" data-testid="test-todo-due-date">Due: ${formattedDate}</time>
           <time class="time-hint" data-testid="test-todo-time-remaining" id="hint-${task.id}"></time>
@@ -255,6 +278,17 @@ taskList.addEventListener("change", function (e) {
 });
 
 taskList.addEventListener("click", function (e) {
+  if (e.target.classList.contains("expand-toggle")) {
+    const btn = e.target;
+    const isExpanded = btn.getAttribute("aria-expanded") === "true";
+    const section = document.getElementById(btn.getAttribute("aria-controls"));
+    btn.setAttribute("aria-expanded", !isExpanded);
+    section.hidden = isExpanded;
+    btn.textContent = isExpanded ? "Show more" : "Show less";
+  }
+});
+
+taskList.addEventListener("click", function (e) {
   if (e.target.classList.contains("edit-btn")) {
     const card = e.target.closest(".task-card");
 
@@ -396,7 +430,7 @@ function rebuildCard(card, task) {
             </select>
           </div>
         </div>
-        ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
+        ${descriptionHTML(task)}
         <div class="card-meta">
           <span class="due-date">Due ${formattedDate}</span>
           <span class="time-hint" id="hint-${task.id}" aria-live="polite"></span>
