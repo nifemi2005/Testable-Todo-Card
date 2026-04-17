@@ -78,6 +78,7 @@ function renderTask(task) {
     .join("");
 
   li.innerHTML = `
+    <div class="priority-indicator priority-indicator-${task.priority}" data-testid="test-todo-priority-indicator"></div>
     <div class="card-top">
     <div>
       <input 
@@ -370,6 +371,7 @@ function rebuildCard(card, task) {
     .join('');
 
   card.innerHTML = `
+    <div class="priority-indicator priority-indicator-${task.priority}" data-testid="test-todo-priority-indicator"></div>
     <div class="card-top">
       <label for="checkbox-${task.id}">
         <input 

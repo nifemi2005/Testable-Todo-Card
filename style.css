@@ -149,6 +149,8 @@ form button:hover {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 18px;
+  position: relative;
+  overflow: hidden;
   transition: opacity 0.3s;
 }
 .task-card.done {
@@ -262,6 +264,27 @@ form button:hover {
   font-weight: 600;
   border-radius: var(--radius-full);
   flex-shrink: 0;
+}
+
+/* Priority indicator strip */
+.priority-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.priority-indicator-high {
+  background: var(--red-dark);
+}
+
+.priority-indicator-medium {
+  background: var(--amber-dark);
+}
+
+.priority-indicator-low {
+  background: var(--green-dark);
 }
 
 /* Priority badges */
