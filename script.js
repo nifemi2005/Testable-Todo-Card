@@ -96,7 +96,11 @@ function renderTask(task) {
           <span class="task-title">${task.title}</span>
           <div class='group'>
             <span class="priority-badge ${priorityClass}" data-testid="test-todo-priority">${task.priority}</span>
-            <span class="status-badge ${statusClass}" data-testid="test-todo-status">${task.status}</span>
+            <select class="status-control ${statusClass}" data-testid="test-todo-status-control" aria-label="Task status">
+              <option value="pending" ${task.status === "pending" ? "selected" : ""}>Pending</option>
+              <option value="in progress" ${task.status === "in progress" ? "selected" : ""}>In Progress</option>
+              <option value="done" ${task.status === "done" ? "selected" : ""}>Done</option>
+            </select>
           </div>
         </div>
         <p class="task-description" data-testid="test-todo-description">${task.description}</p>
@@ -210,32 +214,41 @@ taskList.addEventListener("change", function (e) {
       card.classList.remove("done");
     }
 
-    const statusBadge = card.querySelector(".status-badge");
+    const statusControl = card.querySelector(".status-control");
 
     if (task.done) {
       task.status = "done";
-
-      statusBadge.textContent = "done";
-
-      statusBadge.classList.remove(
-        "status-pending",
-        "status-inprogress",
-        "status-done",
-      );
-
-      statusBadge.classList.add("status-done");
+      statusControl.value = "done";
+      statusControl.className = "status-control status-done";
     } else {
       task.status = "pending";
+      statusControl.value = "pending";
+      statusControl.className = "status-control status-pending";
+    }
+  }
+});
 
-      statusBadge.textContent = "pending";
+taskList.addEventListener("change", function (e) {
+  if (e.target.classList.contains("status-control")) {
+    const card = e.target.closest(".task-card");
+    const taskId = Number(card.dataset.id);
+    const task = tasks.find((t) => t.id === taskId);
+    const checkbox = card.querySelector('input[type="checkbox"]');
 
-      statusBadge.classList.remove(
-        "status-pending",
-        "status-inprogress",
-        "status-done",
-      );
+    task.status = e.target.value;
+    const statusClass = `status-${task.status.replace(" ", "")}`;
+    e.target.className = `status-control ${statusClass}`;
 
-      statusBadge.classList.add("status-pending");
+    if (task.status === "done") {
+      task.done = true;
+      checkbox.checked = true;
+      checkbox.setAttribute("aria-checked", "true");
+      card.classList.add("done");
+    } else {
+      task.done = false;
+      checkbox.checked = false;
+      checkbox.setAttribute("aria-checked", "false");
+      card.classList.remove("done");
     }
   }
 });
@@ -372,8 +385,14 @@ function rebuildCard(card, task) {
       <div class="card-body">
         <div class="card-row">
           <span class="task-title">${task.title}</span>
-          <span class="priority-badge ${priorityClass}">${task.priority}</span>
-          <span class="status-badge ${statusClass}">${task.status}</span>
+          <div class="group">
+            <span class="priority-badge ${priorityClass}">${task.priority}</span>
+            <select class="status-control ${statusClass}" data-testid="test-todo-status-control" aria-label="Task status">
+              <option value="pending" ${task.status === 'pending' ? 'selected' : ''}>Pending</option>
+              <option value="in progress" ${task.status === 'in progress' ? 'selected' : ''}>In Progress</option>
+              <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
+            </select>
+          </div>
         </div>
         ${task.description ? `<p class="task-description">${task.description}</p>` : ''}
         <div class="card-meta">
