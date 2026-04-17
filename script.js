@@ -130,7 +130,8 @@ function renderTask(task) {
         ${descriptionHTML(task)}
         <div class="card-meta">
           <time class="due-date" data-testid="test-todo-due-date">Due: ${formattedDate}</time>
-          <time class="time-hint" data-testid="test-todo-time-remaining" id="hint-${task.id}"></time>
+          <span class="overdue-indicator" data-testid="test-todo-overdue-indicator" hidden></span>
+          <time class="time-hint" data-testid="test-todo-time-remaining" id="hint-${task.id}" aria-live="polite"></time>
         </div>
         <ul class="tags" data-testid="test-todo-tags" role="list">
           <li>${tagsHTML}</li>
@@ -149,53 +150,78 @@ function renderTask(task) {
 }
 
 function updateTimeHint(task) {
-  const hintE1 = document.getElementById(`hint-${task.id}`);
+  const hintEl = document.getElementById(`hint-${task.id}`);
+  if (!hintEl) return;
 
-  if (!hintE1) return;
+  const card = hintEl.closest(".task-card");
+  const overdueIndicator = card
+    ? card.querySelector('[data-testid="test-todo-overdue-indicator"]')
+    : null;
+
+  if (task.done || task.status === "done") {
+    hintEl.textContent = "Completed";
+    hintEl.className = "time-hint hint-done";
+    if (overdueIndicator) overdueIndicator.hidden = true;
+    return;
+  }
 
   if (!task.dueDate) {
-    hintE1.textContent = "";
+    hintEl.textContent = "";
+    hintEl.className = "time-hint";
+    if (overdueIndicator) overdueIndicator.hidden = true;
     return;
   }
 
   const now = new Date();
   const due = new Date(task.dueDate);
-
   const diffMs = due - now;
-
-  const diffMins = Math.round(diffMs / 60000);
-  const diffHours = Math.round(diffMs / 3600000);
-  const diffDays = Math.round(diffMs / 86400000);
+  const absDiffMs = Math.abs(diffMs);
+  const absDiffMins = Math.floor(absDiffMs / 60000);
+  const absDiffHours = Math.floor(absDiffMs / 3600000);
+  const absDiffDays = Math.floor(absDiffMs / 86400000);
 
   let text = "";
   let cls = "";
+  let isOverdue = false;
 
-  if (diffMins <= 0 && diffMins > -60) {
-    text = "Due now!";
-    cls = "hint-now";
-  } else if (diffMins < 0) {
-    if (diffHours < 24) {
-      text = `Overdue by ${Math.abs(diffHours)} hour${Math.abs(diffHours) !== 1 ? "s" : ""}`;
+  if (diffMs <= 0) {
+    isOverdue = true;
+    if (absDiffMins < 60) {
+      text = absDiffMins <= 1
+        ? "Overdue by 1 minute"
+        : `Overdue by ${absDiffMins} minutes`;
+    } else if (absDiffHours < 24) {
+      text = absDiffHours === 1
+        ? "Overdue by 1 hour"
+        : `Overdue by ${absDiffHours} hours`;
     } else {
-      text = `Overdue by ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? "s" : ""}`;
+      text = absDiffDays === 1
+        ? "Overdue by 1 day"
+        : `Overdue by ${absDiffDays} days`;
     }
     cls = "hint-overdue";
-  } else if (diffDays == 0) {
-    text = "Due today";
+  } else if (diffMs < 60000) {
+    text = "Due now!";
+    cls = "hint-now";
+  } else if (diffMs < 3600000) {
+    const mins = Math.round(diffMs / 60000);
+    text = mins === 1 ? "Due in 1 minute" : `Due in ${mins} minutes`;
     cls = "hint-soon";
-  } else if (diffDays == 1) {
+  } else if (diffMs < 86400000) {
+    const hours = Math.round(diffMs / 3600000);
+    text = hours === 1 ? "Due in 1 hour" : `Due in ${hours} hours`;
+    cls = "hint-soon";
+  } else if (absDiffDays === 1) {
     text = "Due tomorrow";
     cls = "hint-soon";
-  } else if (diffDays <= 3) {
-    text = `Due ${diffDays} days`;
-    cls = "hint-soon";
   } else {
-    text = `Due in ${diffDays} days`;
+    text = `Due in ${absDiffDays} days`;
     cls = "hint-ok";
   }
 
-  hintE1.textContent = text;
-  hintE1.className = `time-hint ${cls}`;
+  hintEl.textContent = text;
+  hintEl.className = `time-hint ${cls}`;
+  if (overdueIndicator) overdueIndicator.hidden = !isOverdue;
 }
 
 // update all task hints every 30 seconds
@@ -433,6 +459,7 @@ function rebuildCard(card, task) {
         ${descriptionHTML(task)}
         <div class="card-meta">
           <span class="due-date">Due ${formattedDate}</span>
+          <span class="overdue-indicator" data-testid="test-todo-overdue-indicator" hidden></span>
           <span class="time-hint" id="hint-${task.id}" aria-live="polite"></span>
         </div>
         <div class="tags">${tagsHTML}</div>

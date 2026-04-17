@@ -5,6 +5,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 :root {
   --cream: #f7f4ee;
   --white: #ffffff;
@@ -374,6 +378,20 @@ form button:hover {
 .hint-now {
   background: #eeedfe;
   color: #3c3489;
+}
+
+.hint-done {
+  background: var(--green);
+  color: var(--green-dark);
+}
+
+.overdue-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--red-dark);
+  flex-shrink: 0;
 }
 
 /* Tags */
